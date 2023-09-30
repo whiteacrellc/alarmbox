@@ -1,3 +1,7 @@
+This uses sendgrid and python3
+Install python3 and pip
+then
+pip install sendgrid
 
 1. Copy alarmbox.servi
 2. sudo systemctl daemon-reload
