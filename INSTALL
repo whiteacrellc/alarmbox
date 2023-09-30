@@ -1,0 +1,17 @@
+
+1. Copy alarmbox.servi
+2. sudo systemctl daemon-reload
+3.sudo systemctl enable my_daemon.service
+4. sudo systemctl enable my_daemon.service
+
+
+
+Other commands
+
+You can also use systemctl commands like status,
+stop, and restart to manage the daemon as a system service.
+
+
+
+
+
