@@ -3,11 +3,49 @@ import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from datetime import datetime
+import logging
+import random
+import argparse
+
 
 class AlarmBox:
-    def __init__(self):
-        _read_settings()
+
+    def __init__(self, settings_file):
         self.settings = {}
+        self._read_settings(settings_file)
+        logfile = self.settings.get('LOG_FILE', 'alarmbox.log')
+        logging.basicConfig(filename=logfile, 
+            level=logging.DEBUG,
+            format='%(asctime)s [%(levelname)s]: %(message)s')
+        self.last_time = datetime.now()
+
+    '''
+    This is where the code for the sensor goes. For testing it will 
+    simulate the sensor not detecting motion to trigger the alarm at
+    random intervals
+    '''
+    def _poll_sensor(self):
+        threshold = self.settings['THRESHOLD']
+        sleepy_time = int(threshold * 1.2)
+        # make a random number with a 20% chance of triggering the alam
+        random_number = random.randint(1, sleepy_time)
+        tgime.sleep(random_number)
+
+
+
+    def run(self):
+        sent_email = False
+        threshold = self.settings['THRESHOLD']
+        while True:
+            self.last_time = datetime.now()
+            self._poll_sensor()
+            time_since_last_signal = self._seconds_since_last_time()
+            if (time_since_last_signal > threshold) and not sent_email:
+                self._send_emai()
+                sent_email = True
+            elif (time_since_last_signal < threshold) and sent_email:
+                # We got movement bel
+                sent_email = False
 
     def _read_settings(self, file_name):
         with open(file_name, 'r') as file:
@@ -17,11 +55,11 @@ class AlarmBox:
                     parts = line.split('=')
                     if len(parts) == 2:
                         name, value = parts
-                        name = name.strip()
-                        value = value.strip()
+                        name = name.upper().strip()
+                        value = value.upper().strip()
                         self.settings[name] = value
 
-    def send_email(self):
+    def _send_email(self):
         # Load SendGrid API key
         date_time = self.get_date_time_string()
         api_key = self.settings['API_KEY']
@@ -53,21 +91,48 @@ class AlarmBox:
         # Format the datetime object as yyyy-MM-dd HH:mm
         return current_datetime.strftime('%Y-%m-%d %H:%M')
 
+    def _seconds_since_last_time(self):
+        now = datetime.now()
+        diff_time = now - self.last_time
+        self.last_time = now
+        return diff_time.total_seconds()
 
+def parse_args():
+    # Create an ArgumentParser object
+    parser = argparse.ArgumentParser(description='Command line argument example')
+
+    # Add the '--fg' argument
+    parser.add_argument('--fg', action='store_true', help='Run in the foreground')
+
+    # Add the '--settings_file' argument with a required filename
+    parser.add_argument('--settings_file', required=True, help='Specify a settings file')
+
+    # Parse the command line arguments
+    args = parser.parse_args()
+
+    # Access the values of the arguments
+    run_in_foreground = args.fg
+    settings_filename = args.settings_file
 
 def my_daemon_function():
-    while True:
-        with open('/tmp/daemon_example.txt', 'a') as f:
-            f.write('Daemon is running...\n')
+    a = AlarmBox(settings_file)
+    a.run()
+
 
 if __name__ == '__main__':
-    # Define the options for daemonization
-    daemon = daemonize.Daemonize(
-        app="my_daemon",
-        pid='/tmp/my_daemon.pid',
-        action=my_daemon_function,
-        foreground=False,
-    )
 
-    # Start the daemon
-    daemon.start())
+    parse_args()
+    
+    # Define the options for daemonization
+    if run_in_foreground:
+        my_daemon_function()
+    else:
+        daemon = daemonize.Daemonize(
+            app='alarmbbox',
+            pid='/tmp/alarmbox.pid',
+            action=my_daemon_function,
+            foreground=False,
+        )
+
+        # Start the daemon)
+        daemon.start()
