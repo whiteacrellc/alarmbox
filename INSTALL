@@ -4,10 +4,14 @@ then
 pip install sendgrid
 pip install daemonize
 
-1. Copy alarmbox.servi
-2. sudo systemctl daemon-reload
-3.sudo systemctl enable my_daemon.service
-4. sudo systemctl enable my_daemon.service
+1. Copy motion.service to /etc/systemd/system
+2. Install the service sudo systemctl enable motion.service
+3. Start the service  sudo systemctl start motion.service
+4. See if the service is running ps auxxx | grep motion
+   if you don't see motion.py then tail /var/log/syslog
+   and fix any errors.
+5. If you change motion.service then reload it with sudo systemctl daemon-reload
+6. Goto 3 and repeat till its running
 
 
 

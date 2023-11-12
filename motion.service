@@ -1,0 +1,18 @@
+[Unit]
+Description=Motion Service
+
+[Service]
+ExecStart=/usr/bin/python3 /usr/local/bin/motion.py
+User=[replace with your your_username]
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+Type=notify
+RuntimeDirectory=motion
+RuntimeDirectoryMode=0755
+
+[Install]
+WantedBy=multi-user.target
+Alias=motion.service
+
+
