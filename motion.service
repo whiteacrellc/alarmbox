@@ -3,16 +3,17 @@ Description=Motion Service
 
 [Service]
 ExecStart=/usr/bin/python3 /usr/local/bin/motion.py
-User=[replace with your your_username]
+WorkingDirectory=/etc/motion
+User=root
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=motion
+PIDFile=/run/alarmbox.pid
+Type=simple
 KillMode=process
-Restart=on-failure
-RestartPreventExitStatus=255
-Type=notify
-RuntimeDirectory=motion
-RuntimeDirectoryMode=0755
+Restart=always
+
 
 [Install]
 WantedBy=multi-user.target
 Alias=motion.service
-
-
