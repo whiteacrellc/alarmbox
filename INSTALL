@@ -3,18 +3,70 @@ Install python3 and pip
 then
 pip install sendgrid
 pip install daemonize
+pip install keyboard
 
-1. Copy alarmbox.servi
-2. sudo systemctl daemon-reload
-3.sudo systemctl enable my_daemon.service
-4. sudo systemctl enable my_daemon.service
 
+Install
+
+1. sudo cp motion.py /usr/local/bin
+   - copies motion.py to where the daemons want to live
+2. sudo cp motion.service /etc/systemd/system
+   - this copies the service file to the correct place
+3. sudo mkdir /etc/motion
+   - make the working directory for motion.py
+4. sudo systemctl enable motion.service
+   - registers the service
+5. sudo systemctl start motion.service
+   - starts the service
+
+Make sure its working
+
+6. ps auxxx | grep motion
+
+   - you should see something like
+
+tom@raspberrypi:~ $ ps auxxx | grep motion
+root      1944  6.6  0.6  38552 12760 ?        Ssl  15:59   0:01 /usr/bin/python3 /usr/local/bin/motion.py
+tom       1951  0.0  0.0   7444   556 pts/0    S+   15:59   0:00 grep --color=auto motion
+
+- if you don't see /usr/local/bin/motion.py then
+   1. tail -f /var/log/syslog | sed 's/.*motion\.service: \(.*\)/\1/'
+
+7. If you make changes to /usr/local/bin/motion.py then goto step 5
+   and repeat until it starts with no errors
+
+8. If you change motion.service then
+
+  - sudo systemctl daemon-reload
+  - sudo systemctl restart motion.service
 
 
 Other commands
 
-You can also use systemctl commands like status,
-stop, and restart to manage the daemon as a system service.
+status:
+
+tom@raspberrypi:/var/log $ sudo systemctl status motion.service
+● motion.service - Motion Service
+     Loaded: loaded (/etc/systemd/system/motion.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sat 2023-11-18 15:30:03 CST; 9min ago
+   Main PID: 1817 (python3)
+      Tasks: 3 (limit: 1539)
+        CPU: 23.936s
+     CGroup: /system.slice/motion.service
+             └─1817 /usr/bin/python3 /usr/local/bin/motion.py
+
+Nov 18 15:30:03 raspberrypi systemd[1]: Started Motion Service.
+Nov 18 15:30:03 raspberrypi motion[1817]: Starting daemon.
+
+If you have print statements in the code, while it is running as a service
+the print statements will go to /var/log/syslog. You can see all the
+statments with
+
+grep motion /var/log/syslog | sed 's/.*motion\.service: \(.*\)/\1/'
+
+Or if you want to view events as they happen
+
+tail -f /var/log/syslog | sed 's/.*motion\.service: \(.*\)/\1/'
 
 
 
