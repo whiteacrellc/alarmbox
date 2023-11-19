@@ -13,7 +13,6 @@ import keyboard
 
 ALERT_TIME_SECONDS = 10
 green_led_on=False
-green_led_on=False
 green_led = LED(18)
 red_led_on=False
 red_led = LED(17)
@@ -22,38 +21,6 @@ PIR_sensor = MotionSensor(4)
 # initialize last_time to 1 minute before the program starts
 signal_event = threading.Event()
 run_in_foreground = True
-
-run_motion_thread=True
-
-
-def greenled(on):
-    global green_led
-    global green_led_on
-    # if state of led is the same return
-    if green_led_on == on:
-        return
-
-    if on:
-        green_led.on()
-        green_led_on=True
-    else:
-        green_led.off()
-        green_led_on=False
-
-def redled(on):
-    global red_led
-    global red_led_on
-    # if state of led is the same return
-    if red_led_on == on:
-        return
-
-    if on:
-        red_led.on()
-        red_led_on=True
-    else:
-        red_led.off()
-        red_led_on=False
-        
 
 run_motion_thread=True
 
@@ -100,18 +67,12 @@ def motion_detected():
     signal_event.set()
     redled(True)
     
-    redled(True)
-    
 def motion_thread():
-    print("motion thread starting")
-    global run_motion_thread
-    while run_motion_thread:
     print("motion thread starting")
     global run_motion_thread
     while run_motion_thread:
         PIR_sensor.wait_for_motion()
         motion_detected()
-    print("motion thread exiting")
     print("motion thread exiting")
 
 # next lines define the variables with their input
@@ -131,20 +92,15 @@ def run_motion():
             signal_event.wait(timeout=ALERT_TIME_SECONDS)
             last_signal_time = seconds_since_last_time()  
 #            print("last signal time = " + str(last_signal_time))
-#            print("last signal time = " + str(last_signal_time))
             if last_signal_time > ALERT_TIME_SECONDS:
                 if not signal_sent:
                     # send email here
                     print("Signal Sent")
                     greenled(True)
                     redled(False)
-                    greenled(True)
-                    redled(False)
                     signal_sent = True
             else:
                 signal_sent = False
-                greenled(False)
-                redled(True)
                 greenled(False)
                 redled(True)
                 
@@ -155,7 +111,6 @@ def run_motion():
         # Handle Ctrl+C gracefully
         print("Exiting...")
         # Wait for the motion detection thread to finish
-        run_motion_thread=False
         run_motion_thread=False
         motion_detection_thread.join()  
         #pir.close()
@@ -175,8 +130,6 @@ def parse_args():
 def run():
     parse_args()
     daemon = daemonize.Daemonize(
-        app='motion',
-        pid='/run/alarmbox.pid',
         app='motion',
         pid='/run/alarmbox.pid',
         action=run_motion,
@@ -200,8 +153,6 @@ def sigterm_handler(signum, frame):
     sys.exit(0)
 
 if __name__ == '__main__':
-    # Set up the signal handler for SIGTERM
-    signal.signal(signal.SIGTERM, sigterm_handler)
     # Set up the signal handler for SIGTERM
     signal.signal(signal.SIGTERM, sigterm_handler)
     run()
