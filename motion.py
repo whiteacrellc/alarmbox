@@ -23,8 +23,8 @@ signal_event = threading.Event()
 run_in_foreground = True
 
 run_motion_thread=True
-
 app_on=True
+
 
 def greenled(on):
     global green_led
@@ -105,7 +105,6 @@ def keyboard_run():
         if key_event.event_type == keyboard.KEY_DOWN:
             key_pressed = key_event.name.lower()
             key_handlers.get(key_pressed, handle_default)()
-
             
 def seconds_since_last_time():
     global last_time
@@ -168,7 +167,6 @@ def run_motion():
                 greenled(False)
                 redled(False)
                 sleep(1)
-                
     except KeyboardInterrupt:
         # Handle Ctrl+C gracefully
         print("Exiting...")
